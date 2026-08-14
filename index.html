@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Viewer</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      background-color: #2b2b2b;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+    }
+    #pdf-container {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+    canvas {
+      width: 100% !important;
+      height: auto !important;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      border-radius: 4px;
+      background-color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="pdf-container"></div>
+
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    // ชื่อไฟล์ PDF ตรงนี้ ต้องตรงกับชื่อไฟล์ที่คุณจะอัปโหลดในขั้นตอนต่อไป
+    const url = 'document.pdf'; 
+
+    const container = document.getElementById('pdf-container');
+
+    pdfjsLib.getDocument(url).promise.then(pdf => {
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        pdf.getPage(pageNum).then(page => {
+          const viewport = page.getViewport({ scale: 1.5 });
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+          
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+
+          container.appendChild(canvas);
+
+          const renderContext = {
+            canvasContext: context,
+            viewport: viewport
+          };
+          page.render(renderContext);
+        });
+      }
+    }).catch(err => {
+      console.error('Error loading PDF:', err);
+    });
+  </script>
+</body>
+</html>
